@@ -1,17 +1,15 @@
-/* Variable article contient api */
-let articles = [];
+/* Variable article contient api c'est DATA */
 
 /* Récupéret les articles depuis mon API */
-async function fetchApi() {
-    await fetch("https://api-kanap-eu.herokuapp.com/api/products")
+function fetchApi() {
+    fetch("http://localhost:3000/api/products")
         .then((res) => res.json())
-        .then((data) => (articles = data));
+        .then((data) => (canapDisplay(data)));
 }
 
 /* Afficher mes cards */
 
-async function canapDisplay() {
-    fetchApi();
+function canapDisplay(articles) {
     let items = document.getElementById("items");
 
     for (let i = 0; i < articles.length; i++) {
@@ -35,4 +33,4 @@ async function canapDisplay() {
     }
 }
 
-canapDisplay();
+fetchApi();
