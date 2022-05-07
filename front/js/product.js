@@ -1,3 +1,20 @@
+/*récupérer l'id*/
+
+window.onload = () => {
+
+    //-------------- Récuperation de l'url et stockage ----------------
+
+    const getIdFromUrl = () => {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const product_id = urlParams.get("id");
+        return product_id;
+    };
+
+    const product_id = getIdFromUrl();
+
+}
+
 let productID = window.location.search.replace("?id=", "");
 let image = document.querySelector("item__img");
 let price = document.getElementById("price");
