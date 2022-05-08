@@ -1,5 +1,7 @@
 /* Variable article contient api c'est DATA */
 
+
+
 /* Récupérer les articles depuis mon API */
 function fetchApi() {
     fetch("http://localhost:3000/api/products")
