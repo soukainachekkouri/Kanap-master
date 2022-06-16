@@ -1,5 +1,5 @@
-const str = window.location;
-const url = new URL(str);
-const id = url.searchParams.get("id");
-const orderId = document.getElementById("orderId");
-orderId.innerHTML = id;
+//Récupération du numéro de commande dans l'url
+const orderId = new URLSearchParams(document.location.search).get("orderId")
+
+//Affichage du numéro de commande
+document.getElementById("orderId").innerText = orderId

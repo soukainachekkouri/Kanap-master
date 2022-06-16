@@ -154,12 +154,42 @@ function getForm() {
 
     // Form regex à dégager de cette fonction
 
-    let prenom = document.getElementById("firstname");
-    let nom = document.getElementById("lastName");
-    let ville = document.getElementById("city");
+    let prenom = document.getElementById("firstName").value;
+    let nom = document.getElementById("lastName").value;
+    let ville = document.getElementById("city").value;
     let adresse = document.getElementById("address");
     let mail = document.getElementById("email").value;
     let valide = true
+
+    // first name
+    let firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
+
+    if (!validateFirstName(prenom)) {
+
+        firstNameErrorMsg.innerText = "Veuillez entrez un prénom valide"
+
+        valide = false
+    }
+
+    // last name
+    let lastNameErrorMsg = document.getElementById("lastNameErrorMsg");
+
+    if (!validateLastName(nom)) {
+
+        lastNameErrorMsg.innerText = "Veuillez entrez une nom valide"
+
+        valide = false
+    }
+
+    // city
+    let cityErrorMsg = document.getElementById("cityErrorMsg");
+    if (!validateCity(ville)) {
+
+        cityErrorMsg.innerText = "Veuillez entrez une adresse valide"
+
+        valide = false
+    }
+
 
     let emailErrorMsg = document.getElementById("emailErrorMsg");
 
@@ -171,69 +201,42 @@ function getForm() {
         valide = false
     }
 
-    // simple RegEx for names : accepted characters by RegEx
-
-    let regexName = /^[a-z][a-z '-.,]{1,31}$|^$/i;
-
-    // first name
-    let firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
-
-    function validateFirstName(prenom) {
-        if (regexName.test(prenom) == false) {
-            return false;
-        } else {
-            firstNameErrorMsg.innerHTML = null;
-            return true;
-        }
-    }
-
-    // last name
-    let lastNameErrorMsg = document.getElementById("lastNameErrorMsg");
-
-    function validateLastName(nom) {
-        if (regexName.test(nom) == false) {
-            return false;
-        } else {
-            lastNameErrorMsg.innerHTML = null;
-            return true;
-        }
-    }
-
-    // city
-    let cityErrorMsg = document.getElementById("cityErrorMsg");
-
-    function validateCity(ville) {
-        if (regexName.test(ville) == false) {
-            return false;
-        } else {
-            cityErrorMsg.innerHTML = "veuillez entrez une adresse mail valide";
-            return true;
-        }
-    }
-
-    function makeJsonData() {
-        let contact = {
-            firstName: prenom.value,
-            lastName: nom.value,
-            address: adresse.value,
-            city: ville.value,
-            email: mail.value,
-        };
-        let items = getCart();
-        let products = [];
-
-        for (i = 0; i < items.length; i++) {
-            if (products.find((e) => e == items[i][0])) {
-                console.log("not found");
-            } else {
-                products.push(items[i][0]);
-            }
-        }
-        let jsonData = JSON.stringify({ contact, products });
-        return jsonData;
-    }
 
     return valide;
+}
+
+function validateFirstName(prenom) {
+    let regexName =
+        /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u;
+
+    if (regexName.test(prenom) == false) {
+        return false;
+    } else {
+        firstNameErrorMsg.innerHTML = null;
+        return true;
+    }
+}
+
+let regexName =
+    /^[a-z][a-z '-.,]{1,31}$|^$/i;
+
+function validateLastName(nom) {
+
+    if (regexName.test(nom) == false) {
+        return false;
+    } else {
+        lastNameErrorMsg.innerHTML = null;
+        return true;
+    }
+}
+
+function validateCity(ville) {
+    if (regexName.test(ville) == false) {
+        return false;
+    } else {
+        cityErrorMsg.innerHTML = null;
+        return true;
+    }
 }
 
 function validateEmail(mail) {
@@ -252,6 +255,59 @@ document.getElementById("order").addEventListener("click", function() {
     let valide = getForm()
     if (valide) {
         // intégrer le post ici 
-    }
+        console.log(orderInfos);
+        fetch("http://localhost:3000/api/products/order/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(orderInfos),
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    return response.json()
+                }
+            })
+
+        //Réinitialiser le localStorage et rediriger l'utilisateur vers la page de confirmation
+        .then(function(data) {
+                console.log(data.order);
+                localStorage.clear()
+                document.location.href = "confirmation.html?orderId=" + data.order
+            })
+            //En cas d'erreur, affichage du message correspondant dans la console
+            .catch(function(err) {
+                console.log(err.message)
+            })
+
+        console.log(valide);
+
+    };
     // une fois que j'ai testé si la valeur de l'eamil est diff de vide, prénom, nom... alors les critères sont correctes et je peux faire ma requête ici
+
 })
+
+//Créer un tableau avec les ids des produits commandés
+let listOfIds = []
+
+function createListofIds() {
+    for (let i in cartArray) {
+        listOfIds.push(cartArray[i]._id)
+    }
+}
+
+//Rassembler les données à transmettre à l'API
+let orderInfos
+
+function createOrderInfos() {
+    orderInfos = {
+        contact: {
+            firstName: firstName.value,
+            lastName: lastName.value,
+            address: address.value,
+            city: city.value,
+            email: email.value
+        },
+        products: listOfIds
+    }
+}
