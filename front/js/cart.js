@@ -6,7 +6,6 @@ function getCanap() {
     let quant = items.length
     document.getElementById("totalQuantity").innerText = quant + "";
     for (let item of items) {
-        console.log(item);
         fetch("http://localhost:3000/api/products/" + item.idChoisie)
             .then(function(response) {
                 return response.json()
@@ -21,7 +20,6 @@ function getCanap() {
                 art.className = "cart__item"
                 art.setAttribute("data-id", item.idChoisie)
                 art.setAttribute("data-color", item.colorChoisie)
-                console.log(art);
 
                 let div_art = document.createElement("div");
                 div_art.className = "cart__item__img"
@@ -31,11 +29,9 @@ function getCanap() {
                 image.setAttribute("alt", data.altTxt)
                 div_art.appendChild(image)
                 art.appendChild(div_art)
-                    /*console.log(image);*/
 
                 let selection = document.getElementById("cart__items")
                 selection.appendChild(art)
-                    /*console.log(image);*/
 
 
                 let cart__item__content = document.createElement("div")
@@ -48,19 +44,16 @@ function getCanap() {
                 let canapname = document.createElement("h2")
                 canapname.innerText = data.name
                 cart__item__content_description.appendChild(canapname)
-                console.log(cart__item__content);
 
                 let canapColor = document.createElement("p")
                 canapColor.innerText = item.colorChoisie
                 cart__item__content_description.appendChild(canapColor)
-                console.log(cart__item__content);
 
                 let canapPrice = document.createElement("p")
                 canapPrice.innerText = data.price
                 cart__item__content_description.appendChild(canapPrice)
                 art.appendChild(cart__item__content)
                 selection.appendChild(art)
-                console.log(cart__item__content);
 
                 let art__item__content__settings = document.createElement("div")
                 art__item__content__settings.className = "cart__item__content__settings"
@@ -73,7 +66,6 @@ function getCanap() {
                 let quant = document.createElement("p")
                 quant.innerText = "Qte"
                 cart__item__content__settings__quantity.appendChild(quant)
-                console.log(cart__item__content);
 
                 let quantSelect = document.createElement("input")
                 quantSelect.setAttribute("type", "number")
@@ -89,12 +81,10 @@ function getCanap() {
                     let oldPrice = parseInt(item.quantityChoisie) * parseInt(data.price)
 
                     somme -= oldPrice
-                    console.log(somme);
 
                     let newQuantity = parseInt(quantSelect.value)
 
                     let newPrice = parseInt(newQuantity) * parseInt(data.price)
-                    console.log(newPrice);
 
                     somme += newPrice
                     item.quantityChoisie = newQuantity
@@ -106,7 +96,6 @@ function getCanap() {
                         window.localStorage.setItem("produits", JSON.stringify(items))
                     }
 
-                    console.log(somme);
                     total.innerText = somme + ""
 
 
@@ -255,13 +244,19 @@ document.getElementById("order").addEventListener("click", function() {
     let valide = getForm()
     if (valide) {
         // intégrer le post ici 
-        console.log(orderInfos);
-        fetch("http://localhost:3000/api/products/order/", {
+        createListofIds()
+        createOrderInfos()
+        const { contact, products } = orderInfos
+        fetch("http://localhost:3000/api/products/order", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-type": "application/json",
+                    "Accept": "application/json",
                 },
-                body: JSON.stringify(orderInfos),
+                body: JSON.stringify({
+                    contact,
+                    products
+                }),
             })
             .then(function(response) {
                 if (response.ok) {
@@ -271,16 +266,12 @@ document.getElementById("order").addEventListener("click", function() {
 
         //Réinitialiser le localStorage et rediriger l'utilisateur vers la page de confirmation
         .then(function(data) {
-                console.log(data.order);
                 localStorage.clear()
-                document.location.href = "confirmation.html?orderId=" + data.order
+                document.location.href = "confirmation.html?orderId=" + data.orderId
             })
             //En cas d'erreur, affichage du message correspondant dans la console
-            .catch(function(err) {
-                console.log(err.message)
-            })
+            .catch(function(err) {})
 
-        console.log(valide);
 
     };
     // une fois que j'ai testé si la valeur de l'eamil est diff de vide, prénom, nom... alors les critères sont correctes et je peux faire ma requête ici
@@ -291,8 +282,9 @@ document.getElementById("order").addEventListener("click", function() {
 let listOfIds = []
 
 function createListofIds() {
-    for (let i in cartArray) {
-        listOfIds.push(cartArray[i]._id)
+    const items = JSON.parse(window.localStorage.getItem("produits"));
+    for (let i of items) {
+        listOfIds.push(i.idChoisie)
     }
 }
 
